@@ -1,0 +1,238 @@
+/* =========================================
+   CONFIGURAÇÕES GLOBAIS
+   ========================================= */
+body {
+    background-color: #000000;
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    overflow: hidden;
+}
+
+.dashboard-layout {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* =========================================
+   MENU LATERAL (SIDEBAR)
+   ========================================= */
+.sidebar {
+    width: 260px;
+    background-color: #0a0a0a;
+    border-right: 1px solid #222;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar__logo {
+    display: flex;
+    align-items: center;
+    padding: 25px;
+    border-bottom: 1px solid #222;
+}
+
+.sidebar__logo svg {
+    width: 32px;
+    height: 32px;
+    fill: #a3e635; /* Verde Cacto */
+    margin-right: 12px;
+}
+
+.sidebar__logo h2 {
+    font-size: 1.3rem;
+    color: #ffffff;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.sidebar__menu ul {
+    list-style: none;
+    padding: 20px 0;
+    margin: 0;
+}
+
+.menu-item {
+    padding: 15px 25px;
+    color: #888;
+    cursor: pointer;
+    font-size: 1rem;
+    border-left: 4px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.menu-item:hover {
+    background-color: #151515;
+    color: #ffffff;
+}
+
+.menu-item.active {
+    background-color: rgba(163, 230, 53, 0.05);
+    color: #a3e635;
+    border-left: 4px solid #a3e635;
+    font-weight: bold;
+}
+
+/* =========================================
+   ÁREA PRINCIPAL E APP BAR
+   ========================================= */
+.main-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #050505;
+}
+
+.app-bar {
+    height: 80px;
+    background-color: #0a0a0a;
+    border-bottom: 1px solid #222;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+}
+
+.app-bar__title h1 {
+    font-size: 1.4rem;
+    color: #ffffff;
+    font-weight: 300;
+}
+
+.user-info { color: #888; font-size: 0.9rem; margin-right: 15px; }
+.user-info strong { color: #a3e635; }
+
+.btn-logout {
+    text-decoration: none;
+    color: #ff4444;
+    border: 1px solid #ff4444;
+    padding: 6px 15px;
+    border-radius: 5px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-logout:hover { background-color: #ff4444; color: white; }
+
+/* =========================================
+   CONTEÚDO E SEÇÕES
+   ========================================= */
+.content-area {
+    flex: 1;
+    padding: 40px;
+    overflow-y: auto;
+}
+
+.content-section {
+    animation: fadeIn 0.4s ease-in-out;
+    display: none;
+}
+
+.content-section.active-section {
+    display: block;
+}
+
+.section-header {
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #222;
+}
+
+.section-header h2 { font-size: 1.8rem; margin-bottom: 10px; }
+.desc { color: #666; font-size: 1rem; margin: 0; }
+
+/* =========================================
+   TABELA DE DADOS
+   ========================================= */
+.activities-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #0a0a0a;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #222;
+}
+
+.activities-table th {
+    text-align: left;
+    padding: 18px;
+    background-color: #111;
+    color: #888;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.activities-table td {
+    padding: 18px;
+    border-bottom: 1px solid #181818;
+    color: #ddd;
+}
+
+/* STATUS BADGES */
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+.status--active { background-color: rgba(163, 230, 53, 0.1); color: #a3e635; border: 1px solid rgba(163, 230, 53, 0.2); }
+.status--inactive { background-color: rgba(255, 68, 68, 0.1); color: #ff4444; border: 1px solid rgba(255, 68, 68, 0.2); }
+
+/* BOTÕES DE ACÇÃO */
+.btn-acao {
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    transition: 0.3s ease;
+    display: inline-block;
+}
+
+.btn-ativar {
+    border: 1px solid #a3e635;
+    color: #a3e635;
+}
+.btn-ativar:hover { background-color: #a3e635; color: #000; }
+
+.btn-desativar {
+    border: 1px solid #ff4444;
+    color: #ff4444;
+}
+.btn-desativar:hover { background-color: #ff4444; color: #fff; }
+
+/* =========================================
+   CARDS DE ERRO E PLACEHOLDERS
+   ========================================= */
+.card-bloqueio {
+    background-color: #1a0a0a;
+    border: 1px solid #4a1a1a;
+    padding: 3rem;
+    border-radius: 12px;
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.card-bloqueio__icon { font-size: 3.5rem; display: block; margin-bottom: 1rem; }
+.card-bloqueio__title { color: #ff4444; font-size: 1.6rem; margin-bottom: 0.5rem; }
+.card-bloqueio__text { color: #888; font-size: 1rem; }
+
+.placeholder-card {
+    background-color: #0a0a0a;
+    border: 1px dashed #333;
+    padding: 60px;
+    text-align: center;
+    border-radius: 12px;
+    color: #555;
+}
+
+/* ANIMAÇÃO */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

@@ -1,0 +1,196 @@
+/* =========================================
+   ESTRUTURA BASE
+   ========================================= */
+body {
+    color: white;
+    font-size: 16px;
+    background-color: var(--black);
+    box-sizing: border-box;
+}
+
+.app {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.app__form {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 550px; /* Aumentei 50px por causa do campo Confirmar Senha */
+    width: 850px;
+    padding: 20px;
+
+    background-color: var(--black);
+    border: 2px solid var(--gray-destaque);
+    border-radius: 5px;
+    box-shadow: 0px 0px 30px var(--gray-shadow);
+}
+
+.app__banner {
+    height: 100%;
+    width: 45%;
+    overflow: hidden;
+    border-radius: 5px;
+    border: 2px solid var(--gray-destaque);
+}
+
+.app__banner > img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
+
+/* Espelha a imagem para ficar diferente da tela de login */
+.img-espelhada {
+    transform: scaleX(-1);
+}
+
+/* =========================================
+   INPUTS E FORMULÁRIO
+   ========================================= */
+.app__inputs {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    width: 50%;
+    padding: 1em;
+}
+
+.app__inputs-copy {
+    height: auto; /* Ajustado para abraçar o subtítulo */
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.app__inputs-copy > h1 {
+    text-align: center;
+    font-family: var(--font-primary);
+    font-size: 1.5em;
+    font-weight: bold; /* Título mais forte no cadastro */
+}
+
+/* Estilo do novo subtítulo */
+.subtitle {
+    font-family: var(--font-secundary);
+    font-size: 0.85em;
+    color: #aaaaaa;
+    margin-top: 5px;
+}
+
+form {
+    width: 100%;
+}
+
+.container__input {
+    flex: 0 0;
+    width: 70%;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    margin: auto;
+}
+
+.input__title {
+    font-family: var(--font-primary);
+    font-size: 0.8em;
+    align-self: flex-start;
+}
+
+.input__style {
+    width: 100%;
+    height: 35px;
+    margin: 0.5em 0 1em 0; /* Margem ligeiramente ajustada para caber tudo bem */
+    border: none;
+    border-radius: 5px;
+    text-align: center;
+    font-family: var(--font-secundary);
+    color: white;
+}
+
+.user__icon {
+    background: url("../../icon/user-icon-input.svg") no-repeat 5px;
+    background-color: var(--gray-destaque);
+}
+
+.pass__icon {
+    background: url("../../icon/pass-icon-input.svg") no-repeat 10px;
+    background-color: var(--gray-destaque);
+}
+
+/* =========================================
+   BOTÕES
+   ========================================= */
+.button__style {
+    margin-top: 1em;
+    width: 100%;
+    height: 40px;
+    text-align: center;
+    background-color: var(--green-lemon-01);
+    border: 1px solid var(--green-lemon-01);
+    border-radius: 5px;
+    font-family: var(--font-primary);
+    color: white;
+    transition: background-color 0.5s, color 0.5s;
+    cursor: pointer;
+}
+
+.button__style:hover {
+    color: var(--green-lemon-01);
+    background-color: #073818;
+}
+
+.button__style--secundary {
+    background-color: transparent;
+    color: var(--green-lemon-01);
+    margin-top: 0.5em;
+}
+
+.button__style--secundary:hover {
+    background-color: rgba(7, 56, 24, 0.5);
+    color: white;
+}
+
+/* =========================================
+   MENSAGENS DE ALERTA (FLASH)
+   ========================================= */
+.alerta {
+    width: 70%;
+    padding: 8px 10px;
+    margin: 0 auto 10px auto;
+    border-radius: 5px;
+    font-family: var(--font-primary);
+    font-size: 0.8em;
+    font-weight: bold;
+    text-align: center;
+    animation: aparecerSuave 0.3s ease-in-out;
+    box-sizing: border-box;
+}
+
+.alerta--erro {
+    background-color: rgba(255, 68, 68, 0.1);
+    color: #ff4444;
+    border: 1px solid #ff4444;
+}
+
+.alerta--sucesso {
+    background-color: rgba(0, 255, 0, 0.1);
+    color: var(--green-lemon-01);
+    border: 1px solid var(--green-lemon-01);
+}
+
+@keyframes aparecerSuave {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

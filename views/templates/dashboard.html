@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Cactocash</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/var.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard/dashboard.css') }}">
+</head>
+<body>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar">
+            <div class="sidebar__logo">
+                <svg viewBox="0 0 100 100">
+                    <rect x="30" y="20" width="10" height="60" rx="5" ry="5"/>
+                    <rect x="60" y="20" width="10" height="60" rx="5" ry="5"/>
+                    <rect x="45" y="40" width="10" height="20" rx="5" ry="5"/>
+                    <rect x="35" y="80" width="30" height="10" rx="5" ry="5"/>
+                </svg>
+                <h2>Cactocash</h2>
+            </div>
+
+            <nav class="sidebar__menu">
+                <ul>
+                    <li class="menu-item active" onclick="mudarAba('usuario', this)">Usuários</li>
+                    <li class="menu-item" onclick="mudarAba('permissao', this)">Permissões</li>
+                    <li class="menu-item" onclick="mudarAba('receita', this)">Receitas</li>
+                    <li class="menu-item" onclick="mudarAba('despesas', this)">Despesas</li>
+                </ul>
+            </nav>
+        </aside>
+
+        <div class="main-wrapper">
+            <header class="app-bar">
+                <div class="app-bar__title">
+                    <h1 id="titulo-pagina">Gestão de Usuários</h1>
+                </div>
+                <div class="app-bar__actions">
+                    <span class="user-info">Olá, <strong>{{ session['usuario_logado'] }}</strong></span>
+                    <a href="{{ url_for('logout') }}" class="btn-logout">Deslogar</a>
+                </div>
+            </header>
+
+            <main class="content-area">
+
+                <section id="aba-usuario" class="content-section active-section">
+                    <div class="section-header">
+                        <h2>Usuários</h2>
+                        <p class="desc">Gerencie quem tem acesso ao sistema Cactocash.</p>
+                    </div>
+
+                    {% if mensagem_bloqueio %}
+                        <div class="card-bloqueio">
+                            <span class="card-bloqueio__icon">🚫</span>
+                            <h3 class="card-bloqueio__title">Acesso Restrito</h3>
+                            <p class="card-bloqueio__text">{{ mensagem_bloqueio }}</p>
+                        </div>
+                    {% else %}
+                        <table class="activities-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome de Usuário</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for usuario in usuarios %}
+                                <tr>
+                                    <td>#{{ usuario.id }}</td>
+                                    <td><strong>{{ usuario.username }}</strong></td>
+                                    <td>
+                                        <span class="status-badge {{ 'status--active' if usuario.is_active else 'status--inactive' }}">
+                                            {{ 'Ativo' if usuario.is_active else 'Inativo' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('alternar_status', id_alvo=usuario.id) }}"
+                                           class="btn-acao {{ 'btn-desativar' if usuario.is_active else 'btn-ativar' }}">
+                                            {{ 'Inativar' if usuario.is_active else 'Ativar' }}
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% endif %}
+                </section>
+
+                <section id="aba-permissao" class="content-section">
+                    <div class="section-header"><h2>Níveis de Acesso</h2></div>
+                    <div class="placeholder-card"><p>⚙️ Configurações de permissões em breve.</p></div>
+                </section>
+
+                <section id="aba-receita" class="content-section">
+                    <div class="section-header"><h2>Receitas</h2></div>
+                    <div class="placeholder-card"><p>💰 Módulo financeiro em desenvolvimento.</p></div>
+                </section>
+
+                <section id="aba-despesas" class="content-section">
+                    <div class="section-header"><h2>Despesas</h2></div>
+                    <div class="placeholder-card"><p>📉 Gestão de custos em desenvolvimento.</p></div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <script>
+        function mudarAba(abaId, elementoClicado) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active-section'));
+            document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+
+            const secao = document.getElementById('aba-' + abaId);
+            if (secao) secao.classList.add('active-section');
+
+            elementoClicado.classList.add('active');
+            document.getElementById('titulo-pagina').innerText = elementoClicado.innerText;
+        }
+    </script>
+</body>
+</html>

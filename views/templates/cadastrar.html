@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Conta - {{titulo_index}}</title>
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/reset.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/var.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static',filename='css/cadastro/cadastro.css') }}">
+</head>
+<body>
+    <main class="app">
+        <section class="app__form">
+
+            <div class="app__inputs">
+                <div class="app__inputs-copy">
+                    <h1>Criar Conta</h1>
+                    <p class="subtitle">Junte-se ao sistema Cactocash</p>
+                </div>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                  {% if messages %}
+                    {% for category, message in messages %}
+                      <div class="alerta alerta--{{ category }}">
+                        {{ message }}
+                      </div>
+                    {% endfor %}
+                  {% endif %}
+                {% endwith %}
+
+                <form action="{{ url_for('cadastrar') }}" method="post">
+                    <fieldset class="container__input">
+                        <label for="iuser" class="input__title">Usuário</label>
+                        <input type="text" name="username" id="iuser" class="input__style user__icon" maxlength="50" required>
+                        <span class="erro__input"></span>
+                    </fieldset>
+
+                    <fieldset class="container__input">
+                        <label for="ipass" class="input__title">Senha</label>
+                        <input type="password" name="password" id="ipass" class="input__style pass__icon" required>
+                        <span class="erro__input"></span>
+                    </fieldset>
+
+                    <fieldset class="container__input">
+                        <label for="ipass-confirm" class="input__title">Confirmar Senha</label>
+                        <input type="password" name="password_confirm" id="ipass-confirm" class="input__style pass__icon" required>
+                        <span class="erro__input"></span>
+                    </fieldset>
+
+                    <fieldset class="container__input">
+                        <input type="submit" class="button__style" value="Finalizar Cadastro">
+                    </fieldset>
+                </form>
+
+                <fieldset class="container__input">
+                    <input type="button" class="button__style button__style--secundary" value="Já tenho conta (Voltar)" onclick="window.location.href='{{ url_for('index') }}'">
+                </fieldset>
+            </div>
+
+            <div class="app__banner">
+                <img src="{{ url_for('static',filename='images/banner.jpg') }}" alt="imagem ilustrativa" class="img-espelhada">
+            </div>
+
+        </section>
+    </main>
+</body>
+</html>
