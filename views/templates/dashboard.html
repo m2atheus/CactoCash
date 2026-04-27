@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard - Cactocash</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/var.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/var.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard/dashboard.css') }}" />
 </head>
 <body>
 
@@ -14,20 +14,20 @@
         <aside class="sidebar">
             <div class="sidebar__logo">
                 <svg viewBox="0 0 100 100">
-                    <rect x="30" y="20" width="10" height="60" rx="5" ry="5"/>
-                    <rect x="60" y="20" width="10" height="60" rx="5" ry="5"/>
-                    <rect x="45" y="40" width="10" height="20" rx="5" ry="5"/>
-                    <rect x="35" y="80" width="30" height="10" rx="5" ry="5"/>
+                    <rect x="30" y="20" width="10" height="60" rx="5" ry="5" />
+                    <rect x="60" y="20" width="10" height="60" rx="5" ry="5" />
+                    <rect x="45" y="40" width="10" height="20" rx="5" ry="5" />
+                    <rect x="35" y="80" width="30" height="10" rx="5" ry="5" />
                 </svg>
                 <h2>Cactocash</h2>
             </div>
 
             <nav class="sidebar__menu">
                 <ul>
-                    <li class="menu-item active" onclick="mudarAba('usuario', this)">Usuários</li>
-                    <li class="menu-item" onclick="mudarAba('permissao', this)">Permissões</li>
-                    <li class="menu-item" onclick="mudarAba('receita', this)">Receitas</li>
-                    <li class="menu-item" onclick="mudarAba('despesas', this)">Despesas</li>
+                    <li class="menu-item active" data-aba="usuario" onclick="mudarAba('usuario', this)">Usu&aacute;rios</li>
+                    <li class="menu-item" data-aba="permissao" onclick="mudarAba('permissao', this)">Permiss&otilde;es</li>
+                    <li class="menu-item" data-aba="receita" onclick="mudarAba('receita', this)">Receitas</li>
+                    <li class="menu-item" data-aba="despesas" onclick="mudarAba('despesas', this)">Despesas</li>
                 </ul>
             </nav>
         </aside>
@@ -35,25 +35,38 @@
         <div class="main-wrapper">
             <header class="app-bar">
                 <div class="app-bar__title">
-                    <h1 id="titulo-pagina">Gestão de Usuários</h1>
+                    <h1 id="titulo-pagina">Gest&atilde;o de Usu&aacute;rios</h1>
                 </div>
                 <div class="app-bar__actions">
-                    <span class="user-info">Olá, <strong>{{ session['usuario_logado'] }}</strong></span>
+                    <span class="user-info">Ol&aacute;, <strong>{{ session['usuario_logado'] }}</strong></span>
                     <a href="{{ url_for('logout') }}" class="btn-logout">Deslogar</a>
                 </div>
             </header>
 
             <main class="content-area">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div id="flash-container">
+                            {% for category, message in messages %}
+                                <div class="flash-message flash-message--{{ category }}">
+                                    <span class="flash-message__icon">{{ 'Aviso' if category == 'erro' else 'Sucesso' }}</span>
+                                    <p class="flash-message__text">{{ message }}</p>
+                                    <button type="button" class="flash-message__close" onclick="fecharMensagensFlash()">&times;</button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
 
                 <section id="aba-usuario" class="content-section active-section">
                     <div class="section-header">
-                        <h2>Usuários</h2>
+                        <h2>Usu&aacute;rios</h2>
                         <p class="desc">Gerencie quem tem acesso ao sistema Cactocash.</p>
                     </div>
 
                     {% if mensagem_bloqueio %}
                         <div class="card-bloqueio">
-                            <span class="card-bloqueio__icon">🚫</span>
+                            <span class="card-bloqueio__icon">Restrito</span>
                             <h3 class="card-bloqueio__title">Acesso Restrito</h3>
                             <p class="card-bloqueio__text">{{ mensagem_bloqueio }}</p>
                         </div>
@@ -62,9 +75,11 @@
                             <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Nome de Usuário</th>
+                                    <th>Nome de Usu&aacute;rio</th>
                                     <th>Status</th>
-                                    <th>Ações</th>
+                                    {% if pode_gerenciar_permissoes %}
+                                        <th>A&ccedil;&otilde;es</th>
+                                    {% endif %}
                                 </tr>
                             </thead>
                             <tbody>
@@ -77,12 +92,18 @@
                                             {{ 'Ativo' if usuario.is_active else 'Inativo' }}
                                         </span>
                                     </td>
-                                    <td>
-                                        <a href="{{ url_for('alternar_status', id_alvo=usuario.id) }}"
-                                           class="btn-acao {{ 'btn-desativar' if usuario.is_active else 'btn-ativar' }}">
-                                            {{ 'Inativar' if usuario.is_active else 'Ativar' }}
-                                        </a>
-                                    </td>
+                                    {% if pode_gerenciar_permissoes %}
+                                        <td>
+                                            {% if usuario.id != session['user_id'] %}
+                                                <a href="{{ url_for('alternar_status', id_alvo=usuario.id) }}"
+                                                   class="btn-acao {{ 'btn-desativar' if usuario.is_active else 'btn-ativar' }}">
+                                                    {{ 'Inativar' if usuario.is_active else 'Ativar' }}
+                                                </a>
+                                            {% else %}
+                                                <span class="status-badge">Administrador Atual</span>
+                                            {% endif %}
+                                        </td>
+                                    {% endif %}
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -91,18 +112,196 @@
                 </section>
 
                 <section id="aba-permissao" class="content-section">
-                    <div class="section-header"><h2>Níveis de Acesso</h2></div>
-                    <div class="placeholder-card"><p>⚙️ Configurações de permissões em breve.</p></div>
+                    <div class="section-header"><h2>N&iacute;veis de Acesso</h2></div>
+                    {% if mensagem_bloqueio_permissoes %}
+                        <div class="card-bloqueio">
+                            <span class="card-bloqueio__icon">Restrito</span>
+                            <h3 class="card-bloqueio__title">Acesso Restrito</h3>
+                            <p class="card-bloqueio__text">{{ mensagem_bloqueio_permissoes }}</p>
+                        </div>
+                    {% else %}
+                        {% if usuarios_gerenciaveis %}
+                            <table class="activities-table">
+                                <thead>
+                                    <tr>
+                                        <th>Usu&aacute;rio</th>
+                                        <th>Status</th>
+                                        <th>Grupo Atual</th>
+                                        <th>Nova Permiss&atilde;o</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for usuario in usuarios_gerenciaveis %}
+                                    <tr>
+                                        <td><strong>{{ usuario.username }}</strong></td>
+                                        <td>
+                                            <span class="status-badge {{ 'status--active' if usuario.is_active else 'status--inactive' }}">
+                                                {{ 'Ativo' if usuario.is_active else 'Inativo' }}
+                                            </span>
+                                        </td>
+                                        <td>{{ usuario.group.name if usuario.group else 'Sem grupo' }}</td>
+                                        <td>
+                                            {% if usuario.id == session['user_id'] %}
+                                                <span class="status-badge">Administrador Atual</span>
+                                            {% else %}
+                                                <form action="{{ url_for('atualizar_permissao_usuario', id_alvo=usuario.id) }}" method="post" class="form-permissao">
+                                                    <select name="role_id" class="select-permissao">
+                                                        {% for grupo in grupos_permissao %}
+                                                            <option value="{{ grupo.id }}" {% if usuario.role_id == grupo.id %}selected{% endif %}>
+                                                                {{ grupo.name }}
+                                                            </option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    <button type="submit" class="btn-salvar-permissao">Salvar</button>
+                                                </form>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <div class="placeholder-card">
+                                <p>N&atilde;o h&aacute; usu&aacute;rios dispon&iacute;veis para ajuste de permiss&atilde;o.</p>
+                            </div>
+                        {% endif %}
+                    {% endif %}
                 </section>
 
                 <section id="aba-receita" class="content-section">
-                    <div class="section-header"><h2>Receitas</h2></div>
-                    <div class="placeholder-card"><p>💰 Módulo financeiro em desenvolvimento.</p></div>
+                    <div class="section-header">
+                        <h2>Receitas</h2>
+                        <p class="desc">Visualize todas as receitas vinculadas ao seu usuário.</p>
+                    </div>
+
+                    {% if pode_cadastrar_receita %}
+                        <div class="form-card">
+                            <div class="form-card__header">
+                                <div>
+                                    <h3>Lançar Receita</h3>
+                                    <p>Cadastre uma nova receita e vincule diretamente ao usuário selecionado.</p>
+                                </div>
+                                <span class="status-badge status--active">Administrador / Gerente</span>
+                            </div>
+
+                            <form action="{{ url_for('cadastrar_receita') }}" method="post" class="receita-form">
+                                <div class="form-grid">
+                                    <label class="field-group">
+                                        <span>Usuário</span>
+                                        <select name="usuario_id" class="field-control" required>
+                                            <option value="">Selecione um usuário</option>
+                                            {% for usuario in usuarios_receita %}
+                                                <option value="{{ usuario.id }}">{{ usuario.username }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </label>
+
+                                    <label class="field-group">
+                                        <span>Descrição</span>
+                                        <input type="text" name="descricao" class="field-control" maxlength="255" placeholder="Ex.: Comissão de vendas" required />
+                                    </label>
+
+                                    <label class="field-group">
+                                        <span>Valor</span>
+                                        <input type="number" name="valor" class="field-control" min="0.01" step="0.01" placeholder="0,00" required />
+                                    </label>
+
+                                    <label class="field-group">
+                                        <span>Recebimento</span>
+                                        <input type="date" name="data_recebimento" class="field-control field-control--date" onclick="this.showPicker && this.showPicker()" required />
+                                    </label>
+
+                                    <label class="field-group">
+                                        <span>Forma de recebimento</span>
+                                        <select name="forma_recebimento" class="field-control" required>
+                                            <option value="">Selecione</option>
+                                            <option value="pix">Pix</option>
+                                            <option value="transferencia">Transferência</option>
+                                            <option value="dinheiro">Dinheiro</option>
+                                            <option value="boleto">Boleto</option>
+                                            <option value="cartao">Cartão</option>
+                                        </select>
+                                    </label>
+
+                                    <label class="field-group">
+                                        <span>Status</span>
+                                        <select name="status" class="field-control" required>
+                                            <option value="">Selecione</option>
+                                            <option value="recebido">Recebido</option>
+                                            <option value="pendente">Pendente</option>
+                                        </select>
+                                    </label>
+
+                                    <label class="field-group">
+                                        <span>Fim da recorrência</span>
+                                        <input type="date" name="data_fim_recorrencia" class="field-control field-control--date" onclick="this.showPicker && this.showPicker()" />
+                                    </label>
+
+                                    <label class="field-group field-group--checkbox">
+                                        <span>Recorrente</span>
+                                        <span class="checkbox-control">
+                                            <input type="checkbox" name="recorrente" />
+                                            <small>Marque quando a receita se repetir.</small>
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <label class="field-group field-group--full">
+                                    <span>Observações</span>
+                                    <textarea name="observacoes" class="field-control field-control--textarea" rows="4" placeholder="Detalhes adicionais sobre a receita"></textarea>
+                                </label>
+
+                                <div class="form-actions">
+                                    <button type="submit" class="btn-salvar-permissao btn-form-submit">Cadastrar Receita</button>
+                                </div>
+                            </form>
+                        </div>
+                    {% endif %}
+
+                    {% if receitas %}
+                        <table class="activities-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Descrição</th>
+                                    <th>Valor</th>
+                                    <th>Recebimento</th>
+                                    <th>Forma</th>
+                                    <th>Status</th>
+                                    <th>Recorrente</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for receita in receitas %}
+                                <tr>
+                                    <td>#{{ receita.id }}</td>
+                                    <td class="col-descricao">
+                                        <strong class="descricao-principal">{{ receita.descricao }}</strong>
+                                        {% if receita.observacoes %}
+                                            <small class="descricao-secundaria">{{ receita.observacoes }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>R$ {{ '%.2f'|format(receita.valor) }}</td>
+                                    <td>{{ receita.data_recebimento.strftime('%d/%m/%Y') }}</td>
+                                    <td>{{ receita.forma_recebimento }}</td>
+                                    <td>
+                                        <span class="status-badge {{ 'status--active' if receita.status == 'recebido' else 'status--inactive' }}">
+                                            {{ receita.status|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td>{{ 'Sim' if receita.recorrente else 'Não' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="placeholder-card"><p>Nenhuma receita cadastrada para o seu usuário.</p></div>
+                    {% endif %}
                 </section>
 
                 <section id="aba-despesas" class="content-section">
                     <div class="section-header"><h2>Despesas</h2></div>
-                    <div class="placeholder-card"><p>📉 Gestão de custos em desenvolvimento.</p></div>
+                    <div class="placeholder-card"><p>Gest&atilde;o de custos em desenvolvimento.</p></div>
                 </section>
 
             </main>
@@ -110,16 +309,45 @@
     </div>
 
     <script>
-        function mudarAba(abaId, elementoClicado) {
-            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active-section'));
-            document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+        function fecharMensagensFlash() {
+            const container = document.getElementById('flash-container');
+            if (container) {
+                container.remove();
+            }
+        }
+
+        function mudarAba(abaId, elementoClicado, limparFlash = true) {
+            if (limparFlash) {
+                fecharMensagensFlash();
+            }
+
+            document.querySelectorAll('.content-section').forEach((s) => s.classList.remove('active-section'));
+            document.querySelectorAll('.menu-item').forEach((i) => i.classList.remove('active'));
 
             const secao = document.getElementById('aba-' + abaId);
-            if (secao) secao.classList.add('active-section');
+            if (secao) {
+                secao.classList.add('active-section');
+            }
 
             elementoClicado.classList.add('active');
             document.getElementById('titulo-pagina').innerText = elementoClicado.innerText;
         }
+
+        function carregarAbaInicial() {
+            const params = new URLSearchParams(window.location.search);
+            const aba = params.get('aba');
+            if (!aba) {
+                return;
+            }
+
+            const itemMenu = document.querySelector(`.menu-item[data-aba="${aba}"]`);
+            if (itemMenu) {
+                mudarAba(aba, itemMenu, false);
+            }
+        }
+
+        carregarAbaInicial();
+        setTimeout(fecharMensagensFlash, 4000);
     </script>
 </body>
 </html>
