@@ -1,5 +1,5 @@
 /* =========================================
-   CONFIGURAÇÕES GLOBAIS
+   CONFIGURACOES GLOBAIS
    ========================================= */
 body {
     background-color: #000000;
@@ -16,7 +16,7 @@ body {
 }
 
 /* =========================================
-   MENU LATERAL (SIDEBAR)
+   MENU LATERAL
    ========================================= */
 .sidebar {
     width: 260px;
@@ -36,7 +36,7 @@ body {
 .sidebar__logo svg {
     width: 32px;
     height: 32px;
-    fill: #a3e635; /* Verde Cacto */
+    fill: #a3e635;
     margin-right: 12px;
 }
 
@@ -77,7 +77,7 @@ body {
 }
 
 /* =========================================
-   ÁREA PRINCIPAL E APP BAR
+   AREA PRINCIPAL
    ========================================= */
 .main-wrapper {
     flex: 1;
@@ -102,8 +102,15 @@ body {
     font-weight: 300;
 }
 
-.user-info { color: #888; font-size: 0.9rem; margin-right: 15px; }
-.user-info strong { color: #a3e635; }
+.user-info {
+    color: #888;
+    font-size: 0.9rem;
+    margin-right: 15px;
+}
+
+.user-info strong {
+    color: #a3e635;
+}
 
 .btn-logout {
     text-decoration: none;
@@ -116,10 +123,13 @@ body {
     transition: 0.3s;
 }
 
-.btn-logout:hover { background-color: #ff4444; color: white; }
+.btn-logout:hover {
+    background-color: #ff4444;
+    color: white;
+}
 
 /* =========================================
-   CONTEÚDO E SEÇÕES
+   CONTEUDO
    ========================================= */
 .content-area {
     flex: 1;
@@ -142,11 +152,76 @@ body {
     border-bottom: 1px solid #222;
 }
 
-.section-header h2 { font-size: 1.8rem; margin-bottom: 10px; }
-.desc { color: #666; font-size: 1rem; margin: 0; }
+.section-header h2 {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+}
+
+.desc {
+    color: #666;
+    font-size: 1rem;
+    margin: 0;
+}
 
 /* =========================================
-   TABELA DE DADOS
+   ALERTAS
+   ========================================= */
+.flash-message {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    background-color: #101010;
+}
+
+.flash-message--success {
+    border-color: rgba(163, 230, 53, 0.3);
+    background-color: rgba(163, 230, 53, 0.08);
+}
+
+.flash-message--erro {
+    border-color: rgba(255, 68, 68, 0.3);
+    background-color: rgba(255, 68, 68, 0.08);
+}
+
+.flash-message__icon {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.flash-message--success .flash-message__icon {
+    color: #a3e635;
+}
+
+.flash-message--erro .flash-message__icon {
+    color: #ff4444;
+}
+
+.flash-message__text {
+    flex: 1;
+    margin: 0;
+    color: #f3f3f3;
+}
+
+.flash-message__close {
+    border: 0;
+    background: transparent;
+    color: #999;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.flash-message__close:hover {
+    color: #fff;
+}
+
+/* =========================================
+   TABELAS
    ========================================= */
 .activities-table {
     width: 100%;
@@ -173,17 +248,28 @@ body {
     color: #ddd;
 }
 
-/* STATUS BADGES */
 .status-badge {
     padding: 5px 12px;
     border-radius: 20px;
     font-size: 0.75rem;
     font-weight: bold;
 }
-.status--active { background-color: rgba(163, 230, 53, 0.1); color: #a3e635; border: 1px solid rgba(163, 230, 53, 0.2); }
-.status--inactive { background-color: rgba(255, 68, 68, 0.1); color: #ff4444; border: 1px solid rgba(255, 68, 68, 0.2); }
 
-/* BOTÕES DE ACÇÃO */
+.status--active {
+    background-color: rgba(163, 230, 53, 0.1);
+    color: #a3e635;
+    border: 1px solid rgba(163, 230, 53, 0.2);
+}
+
+.status--inactive {
+    background-color: rgba(255, 68, 68, 0.1);
+    color: #ff4444;
+    border: 1px solid rgba(255, 68, 68, 0.2);
+}
+
+/* =========================================
+   ACOES
+   ========================================= */
 .btn-acao {
     text-decoration: none;
     padding: 8px 16px;
@@ -198,16 +284,228 @@ body {
     border: 1px solid #a3e635;
     color: #a3e635;
 }
-.btn-ativar:hover { background-color: #a3e635; color: #000; }
+
+.btn-ativar:hover {
+    background-color: #a3e635;
+    color: #000;
+}
 
 .btn-desativar {
     border: 1px solid #ff4444;
     color: #ff4444;
 }
-.btn-desativar:hover { background-color: #ff4444; color: #fff; }
+
+.btn-desativar:hover {
+    background-color: #ff4444;
+    color: #fff;
+}
 
 /* =========================================
-   CARDS DE ERRO E PLACEHOLDERS
+   FORMULARIO DE PERMISSOES
+   ========================================= */
+.form-permissao {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.select-permissao {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+    border: 1px solid #333;
+    padding: 6px 12px;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: border-color 0.2s ease;
+    appearance: auto;
+}
+
+.select-permissao:focus {
+    border-color: #a3e635;
+}
+
+.select-permissao option {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+}
+
+.btn-salvar-permissao {
+    background-color: transparent;
+    color: #a3e635;
+    border: 1px solid #a3e635;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-salvar-permissao:hover {
+    background-color: #a3e635;
+    color: #000;
+}
+
+/* =========================================
+   FORMULARIO DE RECEITAS
+   ========================================= */
+.form-card {
+    background-color: #0a0a0a;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 28px;
+}
+
+.form-card__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.form-card__header h3 {
+    margin: 0 0 8px;
+    font-size: 1.2rem;
+}
+
+.form-card__header p {
+    margin: 0;
+    color: #666;
+    line-height: 1.5;
+}
+
+.receita-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.field-group span {
+    color: #bdbdbd;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.field-control {
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #111;
+    color: #f3f3f3;
+    border: 1px solid #2d2d2d;
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.field-control:focus {
+    border-color: #a3e635;
+    box-shadow: 0 0 0 3px rgba(163, 230, 53, 0.08);
+}
+
+.field-control--textarea {
+    min-height: 110px;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.field-control--date {
+    min-height: 46px;
+    color-scheme: dark;
+    cursor: pointer;
+}
+
+.field-control--date::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(0.75);
+    opacity: 0.9;
+}
+
+.field-group--full {
+    width: 100%;
+}
+
+.field-group--checkbox {
+    justify-content: flex-end;
+    min-height: 100%;
+}
+
+.checkbox-control {
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background-color: #111;
+    border: 1px solid #2d2d2d;
+    border-radius: 8px;
+}
+
+.checkbox-control small {
+    color: #7a7a7a;
+    font-size: 0.82rem;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.field-group--checkbox input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    flex-shrink: 0;
+    accent-color: #a3e635;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-form-submit {
+    padding: 10px 18px;
+    border-radius: 8px;
+}
+
+.col-descricao {
+    min-width: 220px;
+}
+
+.descricao-principal {
+    display: block;
+    margin-bottom: 6px;
+    color: #f3f3f3;
+}
+
+.descricao-secundaria {
+    display: block;
+    color: #8d8d8d;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    white-space: normal;
+    word-break: break-word;
+}
+
+/* =========================================
+   BLOQUEIOS E PLACEHOLDERS
    ========================================= */
 .card-bloqueio {
     background-color: #1a0a0a;
@@ -218,9 +516,22 @@ body {
     margin-top: 2rem;
 }
 
-.card-bloqueio__icon { font-size: 3.5rem; display: block; margin-bottom: 1rem; }
-.card-bloqueio__title { color: #ff4444; font-size: 1.6rem; margin-bottom: 0.5rem; }
-.card-bloqueio__text { color: #888; font-size: 1rem; }
+.card-bloqueio__icon {
+    font-size: 3.5rem;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.card-bloqueio__title {
+    color: #ff4444;
+    font-size: 1.6rem;
+    margin-bottom: 0.5rem;
+}
+
+.card-bloqueio__text {
+    color: #888;
+    font-size: 1rem;
+}
 
 .placeholder-card {
     background-color: #0a0a0a;
@@ -231,8 +542,35 @@ body {
     color: #555;
 }
 
-/* ANIMAÇÃO */
+/* =========================================
+   ANIMACOES
+   ========================================= */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 960px) {
+    .form-card__header {
+        flex-direction: column;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        justify-content: stretch;
+    }
+
+    .btn-form-submit {
+        width: 100%;
+    }
 }
