@@ -5,6 +5,12 @@ from models.usuario import User
 
 class ControlePermissoesUsuarios:
     @staticmethod
+    def _nome_grupo(usuario):
+        if not usuario or not usuario.group or not usuario.group.name:
+            return None
+        return usuario.group.name.upper()
+
+    @staticmethod
     def usuario_eh_administrador(usuario):
         return bool(usuario and usuario.group and usuario.group.access_permissions)
 
@@ -13,7 +19,26 @@ class ControlePermissoesUsuarios:
         return bool(
             usuario
             and usuario.group
-            and usuario.group.name in {'ADMIN', 'GERENTE'}
+            and ControlePermissoesUsuarios._nome_grupo(usuario) in {'ADMIN', 'GERENTE', 'USUARIO_PADRAO'}
+        )
+
+    @staticmethod
+    def usuario_pode_lancar_despesa(usuario):
+        return bool(
+            usuario
+            and usuario.group
+            and (
+                usuario.group.access_expense
+                or ControlePermissoesUsuarios._nome_grupo(usuario) in {'ADMIN', 'GERENTE', 'USUARIO_PADRAO'}
+            )
+        )
+
+    @staticmethod
+    def usuario_pode_lancar_para_terceiros(usuario):
+        return bool(
+            usuario
+            and usuario.group
+            and ControlePermissoesUsuarios._nome_grupo(usuario) in {'ADMIN', 'GERENTE'}
         )
 
     @classmethod

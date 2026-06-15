@@ -146,6 +146,29 @@ body {
     display: block;
 }
 
+#aba-receita.active-section,
+#aba-despesas.active-section {
+    display: flex;
+    flex-direction: column;
+}
+
+#aba-receita .section-header,
+#aba-despesas .section-header {
+    order: 1;
+}
+
+#aba-receita .module-table,
+#aba-despesas .module-table,
+#aba-receita > .placeholder-card,
+#aba-despesas > .placeholder-card {
+    order: 2;
+}
+
+#aba-receita .form-card--collapsible,
+#aba-despesas .form-card--collapsible {
+    order: 3;
+}
+
 .section-header {
     margin-bottom: 30px;
     padding-bottom: 15px;
@@ -161,6 +184,152 @@ body {
     color: #666;
     font-size: 1rem;
     margin: 0;
+}
+
+/* =========================================
+   RESUMO FINANCEIRO
+   ========================================= */
+.summary-grid {
+    display: flex;
+    align-items: stretch;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.summary-card {
+    flex: 1 1 240px;
+    background-color: #0a0a0a;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.summary-card__label {
+    display: block;
+    color: #888;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+}
+
+.summary-card__value {
+    display: block;
+    color: #f3f3f3;
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 12px;
+}
+
+.summary-card__hint {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.summary-card--receita {
+    border-color: rgba(163, 230, 53, 0.3);
+    background-color: rgba(163, 230, 53, 0.05);
+}
+
+.summary-card--receita .summary-card__value {
+    color: #a3e635;
+}
+
+.summary-card--despesa {
+    border-color: rgba(255, 68, 68, 0.3);
+    background-color: rgba(255, 68, 68, 0.05);
+}
+
+.summary-card--despesa .summary-card__value {
+    color: #ff4444;
+}
+
+.dashboard-panel {
+    margin-top: 28px;
+    background-color: #0a0a0a;
+    border: 1px solid #222;
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.module-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.module-header h3 {
+    margin: 0 0 8px;
+    font-size: 1.2rem;
+}
+
+.module-header p {
+    margin: 0;
+    color: #666;
+    line-height: 1.5;
+}
+
+.movements-table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    overflow: hidden;
+    border: 1px solid #222;
+    border-radius: 8px;
+}
+
+.movements-table th {
+    text-align: left;
+    padding: 15px 18px;
+    background-color: #111;
+    color: #888;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.movements-table td {
+    padding: 16px 18px;
+    border-top: 1px solid #181818;
+    color: #ddd;
+}
+
+.movement-value {
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.movement-value--receita {
+    color: #a3e635;
+}
+
+.movement-value--despesa {
+    color: #ff4444;
+}
+
+.chart-placeholder {
+    min-height: 220px;
+    margin-top: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #0d0d0d;
+    border: 1px dashed #333;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.chart-placeholder h3 {
+    margin: 0 0 8px;
+    font-size: 1.2rem;
+}
+
+.chart-placeholder p {
+    margin: 0;
+    color: #666;
 }
 
 /* =========================================
@@ -360,6 +529,34 @@ body {
     margin-bottom: 28px;
 }
 
+.form-card--collapsible {
+    display: none;
+    margin-top: 24px;
+}
+
+.form-card--open {
+    display: block;
+}
+
+.btn-new-entry {
+    flex-shrink: 0;
+    background-color: #a3e635;
+    color: #000;
+    border: 1px solid #a3e635;
+    border-radius: 8px;
+    padding: 11px 18px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 800;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-new-entry:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(163, 230, 53, 0.18);
+}
+
 .form-card__header {
     display: flex;
     align-items: flex-start;
@@ -379,7 +576,8 @@ body {
     line-height: 1.5;
 }
 
-.receita-form {
+.receita-form,
+.despesa-form {
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -389,6 +587,25 @@ body {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 18px;
+}
+
+.money-field {
+    position: relative;
+}
+
+.money-field::before {
+    content: "R$";
+    position: absolute;
+    left: 14px;
+    bottom: 13px;
+    color: #a3e635;
+    font-size: 0.9rem;
+    font-weight: 800;
+    pointer-events: none;
+}
+
+.money-field .field-control {
+    padding-left: 42px;
 }
 
 .field-group {
@@ -475,6 +692,69 @@ body {
     accent-color: #a3e635;
 }
 
+.toggle-switch {
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background-color: #111;
+    border: 1px solid #2d2d2d;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.toggle-switch input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.toggle-slider {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+    border-radius: 999px;
+    background-color: #2b2b2b;
+    transition: background-color 0.2s ease;
+}
+
+.toggle-slider::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #888;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background-color: rgba(163, 230, 53, 0.25);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(20px);
+    background-color: #a3e635;
+}
+
+.toggle-switch small {
+    color: #7a7a7a;
+    font-size: 0.82rem;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.toggle-switch--compact {
+    min-height: auto;
+    padding: 10px 12px;
+}
+
 .form-actions {
     display: flex;
     justify-content: flex-end;
@@ -502,6 +782,75 @@ body {
     line-height: 1.45;
     white-space: normal;
     word-break: break-word;
+}
+
+.col-acoes {
+    min-width: 180px;
+}
+
+.edit-details {
+    display: inline-block;
+    position: relative;
+    margin-right: 8px;
+}
+
+.edit-details summary {
+    list-style: none;
+}
+
+.edit-details summary::-webkit-details-marker {
+    display: none;
+}
+
+.btn-editar {
+    border: 1px solid #a3e635;
+    color: #a3e635;
+}
+
+.btn-editar:hover {
+    background-color: #a3e635;
+    color: #000;
+}
+
+.inline-edit-form {
+    position: absolute;
+    right: 0;
+    top: 42px;
+    z-index: 20;
+    width: 360px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 16px;
+    background-color: #0a0a0a;
+    border: 1px solid #333;
+    border-radius: 10px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+}
+
+.inline-edit-form .field-control {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+}
+
+.inline-edit-form .field-control--textarea {
+    min-height: 80px;
+}
+
+.checkbox-control--compact {
+    min-height: auto;
+    padding: 10px 12px;
+}
+
+.form-delete {
+    display: inline-block;
+    margin: 0;
+}
+
+.form-delete button {
+    font-family: inherit;
+    background-color: transparent;
+    cursor: pointer;
 }
 
 /* =========================================
@@ -558,8 +907,26 @@ body {
 }
 
 @media (max-width: 960px) {
+    .summary-grid {
+        flex-direction: column;
+    }
+
     .form-card__header {
         flex-direction: column;
+    }
+
+    .module-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-new-entry {
+        width: 100%;
+    }
+
+    .dashboard-panel,
+    .chart-placeholder {
+        overflow-x: auto;
     }
 
     .form-grid {

@@ -22,6 +22,9 @@ class AppController:
             if user and user.check_password(password) and user.is_active:
                 session['usuario_logado'] = username
                 session['user_id'] = user.id
+                session['user_role'] = user.group.name if user.group else None
+                if session['user_role'] == 'USUARIO_PADRAO':
+                    return redirect('/dashboard')
                 return redirect('/dashboard')
 
             if user and not user.is_active:
@@ -49,7 +52,9 @@ class AppController:
                 flash('Usuario ja cadastrado', 'erro')
                 return redirect('/cadastrar')
             else:
-                grupo_padrao = Permissoes.query.filter_by(name='GERENTE').first()
+                grupo_padrao = Permissoes.query.filter_by(name='USUARIO_PADRAO').first()
+                if grupo_padrao is None:
+                    grupo_padrao = Permissoes.query.filter_by(name='GERENTE').first()
                 if grupo_padrao is None:
                     grupo_padrao = Permissoes.query.order_by(Permissoes.id.asc()).first()
 
