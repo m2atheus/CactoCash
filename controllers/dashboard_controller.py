@@ -9,10 +9,13 @@ from models.categoria import Categoria
 from models.database import db
 from models.controle_permissoes import ControlePermissoesUsuarios
 from models.despesa import Despesa
+from models.permissoes import Permissoes
 from models.receita import Receita
 from models.usuario import User
 
 class DashboardController:
+    ROLES_GESTAO = {'ADMIN', 'GERENTE'}
+    ROLE_USUARIO_PADRAO = 'USUARIO_PADRAO'
 
     @staticmethod
     def _obter_usuario_logado():
@@ -24,6 +27,88 @@ class DashboardController:
             session.clear()
 
         return usuario_logado
+
+    @staticmethod
+    def _nome_role(usuario):
+        if not usuario or not usuario.group or not usuario.group.name:
+            return None
+        return usuario.group.name.upper()
+
+    @staticmethod
+    def _usuario_eh_gestao(usuario):
+        return DashboardController._nome_role(usuario) in DashboardController.ROLES_GESTAO
+
+    @staticmethod
+    def _usuario_eh_padrao(usuario):
+        return DashboardController._nome_role(usuario) == DashboardController.ROLE_USUARIO_PADRAO
+
+    @staticmethod
+    def _obter_redirect_dashboard(aba_destino, usuario_alvo=None):
+        if usuario_alvo is not None:
+            return f'/dashboard?user_id={usuario_alvo.id}&aba={aba_destino}'
+        return f'/dashboard?aba={aba_destino}'
+
+    @staticmethod
+    def _listar_usuarios_padrao(apenas_ativos=False):
+        consulta = User.query.join(Permissoes).filter(
+            func.upper(Permissoes.name) == DashboardController.ROLE_USUARIO_PADRAO,
+        )
+
+        if apenas_ativos:
+            consulta = consulta.filter(User.is_active.is_(True))
+
+        return consulta.order_by(User.username.asc()).all()
+
+    @staticmethod
+    def _resolver_usuario_dashboard(usuario_logado, user_id=None):
+        if DashboardController._usuario_eh_gestao(usuario_logado):
+            if user_id is None:
+                return None, None
+
+            usuario_alvo = User.query.get(user_id)
+            if usuario_alvo is None:
+                return None, 'Usuario selecionado invalido.'
+
+            if usuario_alvo.id == usuario_logado.id:
+                return None, 'Admin e Gerente nao possuem dashboard financeiro proprio.'
+
+            if not DashboardController._usuario_eh_padrao(usuario_alvo):
+                return None, 'Admin e Gerente so podem visualizar dados de Usuario_Padrao.'
+
+            return usuario_alvo, None
+
+        if user_id is not None and user_id != usuario_logado.id:
+            return None, 'Voce nao tem permissao para acessar o dashboard de outro usuario.'
+
+        return usuario_logado, None
+
+    @staticmethod
+    def _resolver_usuario_lancamento(usuario_logado, usuario_id, aba_destino):
+        if ControlePermissoesUsuarios.usuario_pode_lancar_para_terceiros(usuario_logado):
+            if usuario_id is None:
+                flash('Selecione o usuario que recebera o lancamento.', 'erro')
+                return None, redirect(f'/dashboard?aba={aba_destino}')
+
+            usuario_alvo = User.query.get(usuario_id)
+            if usuario_alvo is None or not usuario_alvo.is_active:
+                flash('Usuario selecionado invalido para receber o lancamento.', 'erro')
+                return None, redirect(f'/dashboard?aba={aba_destino}')
+
+            if usuario_alvo.id == usuario_logado.id:
+                flash('Admin e Gerente nao podem criar lancamentos para si mesmos.', 'erro')
+                return None, redirect(f'/dashboard?aba={aba_destino}')
+
+            if not DashboardController._usuario_eh_padrao(usuario_alvo):
+                flash('Admin e Gerente so podem criar lancamentos para Usuario_Padrao.', 'erro')
+                return None, redirect(f'/dashboard?aba={aba_destino}')
+
+            return usuario_alvo, None
+
+        if usuario_id is not None and usuario_id != usuario_logado.id:
+            flash('Voce nao tem permissao para criar lancamentos para outro usuario.', 'erro')
+            return None, redirect(f'/dashboard?aba={aba_destino}')
+
+        return usuario_logado, None
 
     @staticmethod
     def _obter_ou_criar_categoria_receita(usuario_alvo):
@@ -90,20 +175,31 @@ class DashboardController:
             return None, redirect(f'/dashboard?aba={aba_destino}')
 
     @staticmethod
-    def listar_usuarios():
+    def listar_usuarios(user_id=None):
         usuario_logado = DashboardController._obter_usuario_logado()
         if usuario_logado is None:
             return redirect('/')
 
+        if user_id is None:
+            user_id = request.args.get('user_id', type=int)
+
+        usuario_alvo_dashboard, erro_dashboard = DashboardController._resolver_usuario_dashboard(usuario_logado, user_id)
+        if erro_dashboard:
+            flash(erro_dashboard, 'erro')
+            return redirect('/dashboard')
+
         usuario_no_banco = []
-        receitas_do_usuario = Receita.query.filter_by(usuario_id=usuario_logado.id).order_by(
-            Receita.data_recebimento.desc(),
-            Receita.id.desc(),
-        ).all()
-        despesas_do_usuario = Despesa.query.filter_by(usuario_id=usuario_logado.id).order_by(
-            Despesa.data_vencimento.desc(),
-            Despesa.id.desc(),
-        ).all()
+        receitas_do_usuario = []
+        despesas_do_usuario = []
+        if usuario_alvo_dashboard is not None:
+            receitas_do_usuario = Receita.query.filter_by(usuario_id=usuario_alvo_dashboard.id).order_by(
+                Receita.data_recebimento.desc(),
+                Receita.id.desc(),
+            ).all()
+            despesas_do_usuario = Despesa.query.filter_by(usuario_id=usuario_alvo_dashboard.id).order_by(
+                Despesa.data_vencimento.desc(),
+                Despesa.id.desc(),
+            ).all()
         movimentacoes = []
         for receita in receitas_do_usuario:
             movimentacoes.append({
@@ -126,12 +222,15 @@ class DashboardController:
             key=lambda movimentacao: movimentacao['data'],
             reverse=True,
         )[:5]
-        total_receitas = db.session.query(func.coalesce(func.sum(Receita.valor), 0)).filter(
-            Receita.usuario_id == usuario_logado.id,
-        ).scalar()
-        total_despesas = db.session.query(func.coalesce(func.sum(Despesa.valor), 0)).filter(
-            Despesa.usuario_id == usuario_logado.id,
-        ).scalar()
+        total_receitas = 0
+        total_despesas = 0
+        if usuario_alvo_dashboard is not None:
+            total_receitas = db.session.query(func.coalesce(func.sum(Receita.valor), 0)).filter(
+                Receita.usuario_id == usuario_alvo_dashboard.id,
+            ).scalar()
+            total_despesas = db.session.query(func.coalesce(func.sum(Despesa.valor), 0)).filter(
+                Despesa.usuario_id == usuario_alvo_dashboard.id,
+            ).scalar()
         saldo_atual = total_receitas - total_despesas
         mensagem_bloqueio = None
         pode_gerenciar_permissoes = ControlePermissoesUsuarios.usuario_eh_administrador(usuario_logado)
@@ -142,10 +241,11 @@ class DashboardController:
         usuarios_receita = []
         pode_cadastrar_despesa = ControlePermissoesUsuarios.usuario_pode_lancar_despesa(usuario_logado)
         usuarios_despesa = []
+        usuarios_padrao_dashboard = []
         pode_lancar_para_terceiros = ControlePermissoesUsuarios.usuario_pode_lancar_para_terceiros(usuario_logado)
 
-        if usuario_logado.group and usuario_logado.group.access_user:
-            usuario_no_banco = User.query.all()
+        if DashboardController._usuario_eh_gestao(usuario_logado):
+            usuario_no_banco = User.query.order_by(User.username.asc()).all()
         else:
             mensagem_bloqueio = 'Acesso Restrito: Você não tem permissão para visualizar a lista de usuários.'
 
@@ -158,14 +258,16 @@ class DashboardController:
             usuarios_gerenciaveis = ControlePermissoesUsuarios.listar_usuarios_gerenciaveis(usuario_logado)
 
         if pode_lancar_para_terceiros:
-            usuarios_receita = User.query.filter_by(is_active=True).order_by(User.username.asc()).all()
+            usuarios_padrao_dashboard = DashboardController._listar_usuarios_padrao()
+            usuarios_receita = DashboardController._listar_usuarios_padrao(apenas_ativos=True)
 
         if pode_lancar_para_terceiros:
-            usuarios_despesa = User.query.filter_by(is_active=True).order_by(User.username.asc()).all()
+            usuarios_despesa = usuarios_receita
 
         return render_template(
             'dashboard.html',
             usuario_logado=usuario_logado,
+            usuario_alvo_dashboard=usuario_alvo_dashboard,
             role_usuario=usuario_logado.group.name.upper() if usuario_logado.group and usuario_logado.group.name else None,
             usuarios=usuario_no_banco,
             receitas=receitas_do_usuario,
@@ -183,6 +285,7 @@ class DashboardController:
             usuarios_receita=usuarios_receita,
             pode_cadastrar_despesa=pode_cadastrar_despesa,
             usuarios_despesa=usuarios_despesa,
+            usuarios_padrao_dashboard=usuarios_padrao_dashboard,
             pode_lancar_para_terceiros=pode_lancar_para_terceiros,
         )
 
@@ -192,7 +295,31 @@ class DashboardController:
         if usuario_logado is None:
             return redirect('/')
 
-        return redirect('/dashboard?aba=despesas')
+        usuario_alvo, erro = DashboardController._resolver_usuario_dashboard(
+            usuario_logado,
+            request.args.get('user_id', type=int),
+        )
+        if erro:
+            flash(erro, 'erro')
+            return redirect('/dashboard')
+
+        return redirect(DashboardController._obter_redirect_dashboard('despesas', usuario_alvo))
+
+    @staticmethod
+    def listar_receitas():
+        usuario_logado = DashboardController._obter_usuario_logado()
+        if usuario_logado is None:
+            return redirect('/')
+
+        usuario_alvo, erro = DashboardController._resolver_usuario_dashboard(
+            usuario_logado,
+            request.args.get('user_id', type=int),
+        )
+        if erro:
+            flash(erro, 'erro')
+            return redirect('/dashboard')
+
+        return redirect(DashboardController._obter_redirect_dashboard('receita', usuario_alvo))
 
     @staticmethod
     def alternar_status(id_alvo):
@@ -249,10 +376,10 @@ class DashboardController:
             flash('Voce nao tem permissao para cadastrar receitas.', 'erro')
             return redirect('/dashboard?aba=receita')
 
-        if ControlePermissoesUsuarios.usuario_pode_lancar_para_terceiros(usuario_logado):
-            usuario_id = request.form.get('usuario_id', type=int)
-        else:
-            usuario_id = usuario_logado.id
+        usuario_id = request.form.get('usuario_id', type=int)
+        usuario_alvo, erro = DashboardController._resolver_usuario_lancamento(usuario_logado, usuario_id, 'receita')
+        if erro:
+            return erro
 
         descricao = (request.form.get('descricao') or '').strip()
         valor_bruto = (request.form.get('valor') or '').strip().replace(',', '.')
@@ -263,13 +390,8 @@ class DashboardController:
         recorrente = request.form.get('recorrente') == 'on'
         data_fim_recorrencia_bruta = (request.form.get('data_fim_recorrencia') or '').strip()
 
-        if not all([usuario_id, descricao, valor_bruto, data_recebimento_bruta, forma_recebimento, status]):
+        if not all([usuario_alvo.id, descricao, valor_bruto, data_recebimento_bruta, forma_recebimento, status]):
             flash('Preencha todos os campos obrigatorios da receita.', 'erro')
-            return redirect('/dashboard?aba=receita')
-
-        usuario_alvo = User.query.get(usuario_id)
-        if usuario_alvo is None or not usuario_alvo.is_active:
-            flash('Usuario selecionado invalido para receber a receita.', 'erro')
             return redirect('/dashboard?aba=receita')
 
         try:
@@ -322,7 +444,7 @@ class DashboardController:
             return redirect('/dashboard?aba=receita')
 
         flash(f'Receita cadastrada com sucesso para {usuario_alvo.username}.', 'success')
-        return redirect('/dashboard?aba=receita')
+        return redirect(DashboardController._obter_redirect_dashboard('receita', usuario_alvo))
 
     @staticmethod
     def cadastrar_despesa():
@@ -334,10 +456,10 @@ class DashboardController:
             flash('Voce nao tem permissao para cadastrar despesas.', 'erro')
             return redirect('/dashboard?aba=despesas')
 
-        if ControlePermissoesUsuarios.usuario_pode_lancar_para_terceiros(usuario_logado):
-            usuario_id = request.form.get('usuario_id', type=int)
-        else:
-            usuario_id = usuario_logado.id
+        usuario_id = request.form.get('usuario_id', type=int)
+        usuario_alvo, erro = DashboardController._resolver_usuario_lancamento(usuario_logado, usuario_id, 'despesas')
+        if erro:
+            return erro
 
         descricao = (request.form.get('descricao') or '').strip()
         valor_bruto = (request.form.get('valor') or '').strip().replace(',', '.')
@@ -349,13 +471,8 @@ class DashboardController:
         recorrente = request.form.get('recorrente') == 'on'
         data_fim_recorrencia_bruta = (request.form.get('data_fim_recorrencia') or '').strip()
 
-        if not all([usuario_id, descricao, valor_bruto, data_vencimento_bruta, forma_pagamento, status]):
+        if not all([usuario_alvo.id, descricao, valor_bruto, data_vencimento_bruta, forma_pagamento, status]):
             flash('Preencha todos os campos obrigatorios da despesa.', 'erro')
-            return redirect('/dashboard?aba=despesas')
-
-        usuario_alvo = User.query.get(usuario_id)
-        if usuario_alvo is None or not usuario_alvo.is_active:
-            flash('Usuario selecionado invalido para receber a despesa.', 'erro')
             return redirect('/dashboard?aba=despesas')
 
         valor, erro = DashboardController._obter_valor_decimal(
@@ -421,7 +538,7 @@ class DashboardController:
             return redirect('/dashboard?aba=despesas')
 
         flash(f'Despesa cadastrada com sucesso para {usuario_alvo.username}.', 'success')
-        return redirect('/dashboard?aba=despesas')
+        return redirect(DashboardController._obter_redirect_dashboard('despesas', usuario_alvo))
 
     @staticmethod
     def atualizar_despesa(id_despesa):

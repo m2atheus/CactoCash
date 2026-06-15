@@ -64,75 +64,107 @@
                 <section id="aba-resumo" class="content-section active-section">
                     <div class="section-header">
                         <h2>Resumo Financeiro</h2>
-                        <p class="desc">Acompanhe os totais financeiros vinculados ao seu usu&aacute;rio.</p>
-                    </div>
-
-                    <div class="summary-grid">
-                        <article class="summary-card summary-card--receita">
-                            <span class="summary-card__label">Total de Receitas</span>
-                            <strong class="summary-card__value">R$ {{ '%.2f'|format(total_receitas) }}</strong>
-                            <small class="summary-card__hint">Entradas cadastradas</small>
-                        </article>
-
-                        <article class="summary-card summary-card--despesa">
-                            <span class="summary-card__label">Total de Despesas</span>
-                            <strong class="summary-card__value">R$ {{ '%.2f'|format(total_despesas) }}</strong>
-                            <small class="summary-card__hint">Sa&iacute;das cadastradas</small>
-                        </article>
-
-                        <article class="summary-card {{ 'summary-card--receita' if saldo_atual >= 0 else 'summary-card--despesa' }}">
-                            <span class="summary-card__label">Saldo Atual</span>
-                            <strong class="summary-card__value">R$ {{ '%.2f'|format(saldo_atual) }}</strong>
-                            <small class="summary-card__hint">Receitas menos despesas</small>
-                        </article>
-                    </div>
-
-                    <section class="dashboard-panel">
-                        <div class="module-header">
-                            <div>
-                                <h3>&Uacute;ltimas Movimenta&ccedil;&otilde;es</h3>
-                                <p>As 5 transa&ccedil;&otilde;es mais recentes do seu usu&aacute;rio.</p>
-                            </div>
-                        </div>
-
-                        {% if ultimas_movimentacoes %}
-                            <table class="movements-table">
-                                <thead>
-                                    <tr>
-                                        <th>Data</th>
-                                        <th>Descri&ccedil;&atilde;o</th>
-                                        <th>Valor</th>
-                                        <th>Tipo</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for movimentacao in ultimas_movimentacoes %}
-                                    <tr>
-                                        <td>{{ movimentacao.data.strftime('%d/%m/%Y') }}</td>
-                                        <td>{{ movimentacao.descricao }}</td>
-                                        <td class="movement-value movement-value--{{ movimentacao.tipo }}">
-                                            R$ {{ '%.2f'|format(movimentacao.valor) }}
-                                        </td>
-                                        <td>
-                                            <span class="status-badge {{ 'status--active' if movimentacao.tipo == 'receita' else 'status--inactive' }}">
-                                                {{ movimentacao.tipo|capitalize }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+                        {% if pode_lancar_para_terceiros and not usuario_alvo_dashboard %}
+                            <p class="desc">Selecione um Usuario_Padrao para visualizar o dashboard financeiro.</p>
+                        {% elif usuario_alvo_dashboard and usuario_alvo_dashboard.id != usuario_logado.id %}
+                            <p class="desc">Acompanhe os totais financeiros de {{ usuario_alvo_dashboard.username }}.</p>
                         {% else %}
-                            <div class="placeholder-card"><p>Nenhuma movimenta&ccedil;&atilde;o registrada ainda.</p></div>
+                            <p class="desc">Acompanhe os totais financeiros vinculados ao seu usu&aacute;rio.</p>
                         {% endif %}
-                    </section>
+                    </div>
 
-                    <section class="chart-placeholder">
-                        <div>
-                            <h3>Resumo por Categoria</h3>
-                            <p>Espa&ccedil;o reservado para o gr&aacute;fico financeiro.</p>
+                    {% if pode_lancar_para_terceiros %}
+                        <section class="dashboard-panel">
+                            <div class="module-header">
+                                <div>
+                                    <h3>Selecionar Usu&aacute;rio</h3>
+                                    <p>Escolha um Usuario_Padrao para carregar receitas, despesas e saldo.</p>
+                                </div>
+                            </div>
+                            <form action="{{ url_for('dashboard') }}" method="get" class="receita-form">
+                                <label class="field-group">
+                                    <span>Usu&aacute;rio</span>
+                                    <select name="user_id" class="field-control" onchange="this.form.submit()" required>
+                                        <option value="">Selecione um usu&aacute;rio</option>
+                                        {% for usuario in usuarios_padrao_dashboard %}
+                                            <option value="{{ usuario.id }}" {% if usuario_alvo_dashboard and usuario_alvo_dashboard.id == usuario.id %}selected{% endif %}>
+                                                {{ usuario.username }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </label>
+                            </form>
+                        </section>
+                    {% endif %}
+
+                    {% if not pode_lancar_para_terceiros or usuario_alvo_dashboard %}
+                        <div class="summary-grid">
+                            <article class="summary-card summary-card--receita">
+                                <span class="summary-card__label">Total de Receitas</span>
+                                <strong class="summary-card__value">R$ {{ '%.2f'|format(total_receitas) }}</strong>
+                                <small class="summary-card__hint">Entradas cadastradas</small>
+                            </article>
+
+                            <article class="summary-card summary-card--despesa">
+                                <span class="summary-card__label">Total de Despesas</span>
+                                <strong class="summary-card__value">R$ {{ '%.2f'|format(total_despesas) }}</strong>
+                                <small class="summary-card__hint">Sa&iacute;das cadastradas</small>
+                            </article>
+
+                            <article class="summary-card {{ 'summary-card--receita' if saldo_atual >= 0 else 'summary-card--despesa' }}">
+                                <span class="summary-card__label">Saldo Atual</span>
+                                <strong class="summary-card__value">R$ {{ '%.2f'|format(saldo_atual) }}</strong>
+                                <small class="summary-card__hint">Receitas menos despesas</small>
+                            </article>
                         </div>
-                    </section>
+
+                        <section class="dashboard-panel">
+                            <div class="module-header">
+                                <div>
+                                    <h3>&Uacute;ltimas Movimenta&ccedil;&otilde;es</h3>
+                                    <p>As 5 transa&ccedil;&otilde;es mais recentes do usu&aacute;rio selecionado.</p>
+                                </div>
+                            </div>
+
+                            {% if ultimas_movimentacoes %}
+                                <table class="movements-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Data</th>
+                                            <th>Descri&ccedil;&atilde;o</th>
+                                            <th>Valor</th>
+                                            <th>Tipo</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for movimentacao in ultimas_movimentacoes %}
+                                        <tr>
+                                            <td>{{ movimentacao.data.strftime('%d/%m/%Y') }}</td>
+                                            <td>{{ movimentacao.descricao }}</td>
+                                            <td class="movement-value movement-value--{{ movimentacao.tipo }}">
+                                                R$ {{ '%.2f'|format(movimentacao.valor) }}
+                                            </td>
+                                            <td>
+                                                <span class="status-badge {{ 'status--active' if movimentacao.tipo == 'receita' else 'status--inactive' }}">
+                                                    {{ movimentacao.tipo|capitalize }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            {% else %}
+                                <div class="placeholder-card"><p>Nenhuma movimenta&ccedil;&atilde;o registrada ainda.</p></div>
+                            {% endif %}
+                        </section>
+
+                        <section class="chart-placeholder">
+                            <div>
+                                <h3>Resumo por Categoria</h3>
+                                <p>Espa&ccedil;o reservado para o gr&aacute;fico financeiro.</p>
+                            </div>
+                        </section>
+                    {% endif %}
                 </section>
 
                 {% if role_usuario != 'USUARIO_PADRAO' %}
@@ -155,7 +187,8 @@
                                         <th>ID</th>
                                         <th>Nome de Usu&aacute;rio</th>
                                         <th>Status</th>
-                                        {% if pode_gerenciar_permissoes %}
+                                        <th>Grupo</th>
+                                        {% if pode_lancar_para_terceiros or pode_gerenciar_permissoes %}
                                             <th>A&ccedil;&otilde;es</th>
                                         {% endif %}
                                     </tr>
@@ -170,15 +203,23 @@
                                                 {{ 'Ativo' if usuario.is_active else 'Inativo' }}
                                             </span>
                                         </td>
-                                        {% if pode_gerenciar_permissoes %}
+                                        <td>{{ usuario.group.name if usuario.group else 'Sem grupo' }}</td>
+                                        {% if pode_lancar_para_terceiros or pode_gerenciar_permissoes %}
                                             <td>
-                                                {% if usuario.id != session['user_id'] %}
-                                                    <a href="{{ url_for('alternar_status', id_alvo=usuario.id) }}"
-                                                       class="btn-acao {{ 'btn-desativar' if usuario.is_active else 'btn-ativar' }}">
-                                                        {{ 'Inativar' if usuario.is_active else 'Ativar' }}
+                                                {% if usuario.is_active and usuario.group and usuario.group.name|upper == 'USUARIO_PADRAO' %}
+                                                    <a href="{{ url_for('dashboard', user_id=usuario.id) }}" class="btn-acao btn-editar">
+                                                        Visualizar dashboard
                                                     </a>
-                                                {% else %}
-                                                    <span class="status-badge">Administrador Atual</span>
+                                                {% endif %}
+                                                {% if pode_gerenciar_permissoes %}
+                                                    {% if usuario.id != session['user_id'] %}
+                                                        <a href="{{ url_for('alternar_status', id_alvo=usuario.id) }}"
+                                                           class="btn-acao {{ 'btn-desativar' if usuario.is_active else 'btn-ativar' }}">
+                                                            {{ 'Inativar' if usuario.is_active else 'Ativar' }}
+                                                        </a>
+                                                    {% else %}
+                                                        <span class="status-badge">Administrador Atual</span>
+                                                    {% endif %}
                                                 {% endif %}
                                             </td>
                                         {% endif %}
@@ -278,7 +319,7 @@
                                             <select name="usuario_id" class="field-control" required>
                                                 <option value="">Selecione um usuário</option>
                                                 {% for usuario in usuarios_receita %}
-                                                    <option value="{{ usuario.id }}">{{ usuario.username }}</option>
+                                                    <option value="{{ usuario.id }}" {% if usuario_alvo_dashboard and usuario_alvo_dashboard.id == usuario.id %}selected{% endif %}>{{ usuario.username }}</option>
                                                 {% endfor %}
                                             </select>
                                         </label>
@@ -419,7 +460,7 @@
                                             <select name="usuario_id" class="field-control" required>
                                                 <option value="">Selecione um usu&aacute;rio</option>
                                                 {% for usuario in usuarios_despesa %}
-                                                    <option value="{{ usuario.id }}">{{ usuario.username }}</option>
+                                                    <option value="{{ usuario.id }}" {% if usuario_alvo_dashboard and usuario_alvo_dashboard.id == usuario.id %}selected{% endif %}>{{ usuario.username }}</option>
                                                 {% endfor %}
                                             </select>
                                         </label>
